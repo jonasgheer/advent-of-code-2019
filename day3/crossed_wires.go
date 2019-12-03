@@ -35,26 +35,28 @@ func main() {
 	wireOneVisited := visitedPositions(wires[0])
 	wireTwoVisited := visitedPositions(wires[1])
 
-	w1 := mapset.NewSet()
-	w2 := mapset.NewSet()
-
-	for _, c := range wireOneVisited {
-		w1.Add(c)
-	}
-	for _, c := range wireTwoVisited {
-		w2.Add(c)
-	}
-	isect := w1.Intersect(w2)
-	fmt.Println(isect.Cardinality())
+	isect := wireOneVisited.Intersect(wireTwoVisited)
 
 	isectSlice := isect.ToSlice()
 	var dists []int
 	for _, c := range isectSlice {
-		dists = append(dists, manhattanDistance(c.(cord)))
+		dists = append(dists, manhattanDistanceFromOrigin(c.(cord)))
 	}
 
-	fmt.Println(min(dists))
+	fmt.Println("distance from central port to closest intersection:", min(dists))
 
+	w1steps := stepsToIntersection(wires[0], isectSlice[0].(cord))
+	w2steps := stepsToIntersection(wires[1], isectSlice[0].(cord))
+	minSteps := w1steps + w2steps
+	for _, c := range isectSlice {
+		w1steps := stepsToIntersection(wires[0], c.(cord))
+		w2steps := stepsToIntersection(wires[1], c.(cord))
+		steps := w1steps + w2steps
+		if steps < minSteps {
+			minSteps = steps
+		}
+	}
+	fmt.Println("fewest combined steps to reach intersection:", minSteps)
 }
 
 func min(values []int) int {
@@ -67,8 +69,7 @@ func min(values []int) int {
 	return m
 }
 
-// from origin 0,0
-func manhattanDistance(c cord) int {
+func manhattanDistanceFromOrigin(c cord) int {
 	x, y := c.x, c.y
 	if x < 0 {
 		x = -x
@@ -79,21 +80,8 @@ func manhattanDistance(c cord) int {
 	return x + y
 }
 
-// bruteforce O(n^2)
-func intersections(a, b []cord) []cord {
-	var match []cord
-	for _, c1 := range a {
-		for _, c2 := range b {
-			if c1 == c2 {
-				match = append(match, c1)
-			}
-		}
-	}
-	return match
-}
-
-func visitedPositions(w wire) []cord {
-	var visited []cord
+func stepsToIntersection(w wire, c cord) int {
+	var steps int
 	var currX, currY int
 
 	for _, ins := range w {
@@ -101,7 +89,52 @@ func visitedPositions(w wire) []cord {
 		case "R":
 			for i := 0; i < ins.units; i++ {
 				currX++
-				visited = append(visited, cord{
+				steps++
+				if currX == c.x && currY == c.y {
+					return steps
+				}
+			}
+		case "U":
+			for i := 0; i < ins.units; i++ {
+				currY++
+				steps++
+				if currX == c.x && currY == c.y {
+					return steps
+				}
+			}
+		case "L":
+			for i := 0; i < ins.units; i++ {
+				currX--
+				steps++
+				if currX == c.x && currY == c.y {
+					return steps
+				}
+			}
+		case "D":
+			for i := 0; i < ins.units; i++ {
+				currY--
+				steps++
+				if currX == c.x && currY == c.y {
+					return steps
+				}
+			}
+		default:
+			log.Fatalf("invalid direction %s", ins.direction)
+		}
+	}
+	panic("path did not reach intersection")
+}
+
+func visitedPositions(w wire) mapset.Set {
+	visited := mapset.NewSet()
+	var currX, currY int
+
+	for _, ins := range w {
+		switch ins.direction {
+		case "R":
+			for i := 0; i < ins.units; i++ {
+				currX++
+				visited.Add(cord{
 					x: currX,
 					y: currY,
 				})
@@ -109,7 +142,7 @@ func visitedPositions(w wire) []cord {
 		case "U":
 			for i := 0; i < ins.units; i++ {
 				currY++
-				visited = append(visited, cord{
+				visited.Add(cord{
 					x: currX,
 					y: currY,
 				})
@@ -117,7 +150,7 @@ func visitedPositions(w wire) []cord {
 		case "L":
 			for i := 0; i < ins.units; i++ {
 				currX--
-				visited = append(visited, cord{
+				visited.Add(cord{
 					x: currX,
 					y: currY,
 				})
@@ -125,7 +158,7 @@ func visitedPositions(w wire) []cord {
 		case "D":
 			for i := 0; i < ins.units; i++ {
 				currY--
-				visited = append(visited, cord{
+				visited.Add(cord{
 					x: currX,
 					y: currY,
 				})
