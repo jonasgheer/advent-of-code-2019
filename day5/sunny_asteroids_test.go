@@ -30,6 +30,23 @@ func TestReadCsvInput(t *testing.T) {
 	}
 }
 
+func TestDiagnosticProgram(t *testing.T) {
+	inputs := [][]int{
+		[]int{3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9},
+		[]int{3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1},
+	}
+	results := []int{1, 1} // for input non-zero
+
+	for i:=0; i< len(inputs);i++ {
+		actual := diagnosticProgram(inputs[i], 23)[len(inputs[i])-1]
+		expected := results[i]
+
+		if actual != expected {
+			t.Errorf("diagnosticProgram(%v) == %d, wanted %d", inputs[i], actual, expected)
+		}
+	}
+}
+
 func TestParseInstruction(t *testing.T) {
 	inputs := []int{
 		1002,
@@ -53,22 +70,3 @@ func TestParseInstruction(t *testing.T) {
 		}
 	}
 }
-
-// test that the resulting slice is correct
-/*
-func TestIntCodeProgram(t *testing.T) {
-	validInput := []int{1002, 4, 3, 4, 33}
-
-	expected := []int{1002, 4, 3, 4, 99}
-	actual := intcodeProgram(validInput)
-
-	if len(actual) != len(expected) {
-		t.Errorf("intcodeProgram(%v) == %v, wanted %v", validInput, actual, expected)
-	}
-	for i := 0; i < len(expected); i++ {
-		if actual[i] != expected[i] {
-			t.Errorf("intcodeProgram(%v) == %v, wanted %v", validInput, actual, expected)
-		}
-	}
-}
-*/
