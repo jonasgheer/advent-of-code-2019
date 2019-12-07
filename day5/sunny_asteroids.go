@@ -111,22 +111,40 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			result = append(result, intcodes[intcodes[i+1]])
 			i += 2
 		case 5: // jump-if-true:
-			if param1 != 0 {
-				if param2 == 0 {
-					i = intcodes[intcodes[i+2]]
-				} else {
-					i = intcodes[i+2]
-				}
+			var a, b int
+			if param1 == 0 {
+				a = intcodes[intcodes[i+1]]
+			} else {
+				a = intcodes[i+1]
+			}
+			if param2 == 0 {
+				b = intcodes[intcodes[i+2]]
+			} else {
+				b = intcodes[i+2]
+			}
+			if a != 0 {
+				i = b
+			} else {
+				i += 3
 			}
 		case 6: // jump-if-false
+			var a, b int
 			if param1 == 0 {
-				if param2 == 0 {
-					i = intcodes[intcodes[i+2]]
-				} else {
-					i = intcodes[i+2]
-				}
+				a = intcodes[intcodes[i+1]]
+			} else {
+				a = intcodes[i+1]
 			}
-		case 7, 8: // less than and equal
+			if param2 == 0 {
+				b = intcodes[intcodes[i+2]]
+			} else {
+				b = intcodes[i+2]
+			}
+			if a == 0 {
+				i = b
+			} else {
+				i += 3
+			}
+		case 7: // less than 
 			var p1, p2, p3 int
 			if param1 == 0 {
 				p1 = intcodes[intcodes[i+1]]
@@ -143,11 +161,35 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			} else {
 				p3 = intcodes[i+3]
 			}
-			if p1 <= p2 {
+			if p1 < p2 {
 				intcodes[p3] = 1
 			} else {
 				intcodes[p3] = 0
 			}
+			i += 4
+		case 8: // equals
+			var p1, p2, p3 int
+			if param1 == 0 {
+				p1 = intcodes[intcodes[i+1]]
+			} else {
+				p1 = intcodes[i+1]
+			}
+			if param2 == 0 {
+				p2 = intcodes[intcodes[i+2]]
+			} else {
+				p2 = intcodes[i+2]
+			}
+			if param3 == 0 {
+				p3 = intcodes[intcodes[i+3]]
+			} else {
+				p3 = intcodes[i+3]
+			}
+			if p1 == p2 {
+				intcodes[p3] = 1
+			} else {
+				intcodes[p3] = 0
+			}
+			i += 4
 		case 99: // halt
 			return result
 		default:
