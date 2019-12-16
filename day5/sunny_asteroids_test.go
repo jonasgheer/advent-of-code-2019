@@ -37,7 +37,7 @@ func TestDiagnosticProgram(t *testing.T) {
 	}
 	results := []int{1, 1} // for input non-zero
 
-	for i:=0; i< len(inputs);i++ {
+	for i := 0; i < len(inputs); i++ {
 		actual := diagnosticProgram(inputs[i], 23)[len(inputs[i])-1]
 		expected := results[i]
 

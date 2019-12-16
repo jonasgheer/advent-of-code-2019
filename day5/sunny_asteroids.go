@@ -59,10 +59,11 @@ func countDigits(n int) int {
 }
 
 func diagnosticProgram(intcodes []int, inputInstruction int) []int {
+	intcodes = append([]int(nil), intcodes...)
 	result := []int{}
 	for i := 0; i < len(intcodes); {
 		ins := parseInstruction(intcodes[i])
-		param3, param2, param1, opcode := ins[0], ins[1], ins[2], ins[3]
+		_, param2, param1, opcode := ins[0], ins[1], ins[2], ins[3]
 		switch opcode {
 		case 1: // add
 			var a, b int
@@ -76,11 +77,7 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			} else {
 				b = intcodes[i+2]
 			}
-			if param3 == 0 {
-				intcodes[intcodes[i+3]] = a + b
-			} else {
-				intcodes[i+3] = a + b
-			}
+			intcodes[intcodes[i+3]] = a + b
 			i += 4
 		case 2: // multiply
 			var a, b int
@@ -94,21 +91,17 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			} else {
 				b = intcodes[i+2]
 			}
-			if param3 == 0 {
-				intcodes[intcodes[i+3]] = a * b
-			} else {
-				intcodes[i+3] = a * b
-			}
+			intcodes[intcodes[i+3]] = a * b
 			i += 4
 		case 3: // input
-			if param1 == 0 {
-				intcodes[intcodes[i+1]] = inputInstruction
-			} else {
-				intcodes[i+1] = inputInstruction
-			}
+			intcodes[intcodes[i+1]] = inputInstruction
 			i += 2
 		case 4: // output
-			result = append(result, intcodes[intcodes[i+1]])
+			if param1 == 0 {
+				result = append(result, intcodes[intcodes[i+1]])
+			} else {
+				result = append(result, intcodes[i+1])
+			}
 			i += 2
 		case 5: // jump-if-true:
 			var a, b int
@@ -144,8 +137,8 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			} else {
 				i += 3
 			}
-		case 7: // less than 
-			var p1, p2, p3 int
+		case 7: // less than
+			var p1, p2 int
 			if param1 == 0 {
 				p1 = intcodes[intcodes[i+1]]
 			} else {
@@ -156,19 +149,14 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			} else {
 				p2 = intcodes[i+2]
 			}
-			if param3 == 0 {
-				p3 = intcodes[intcodes[i+3]]
-			} else {
-				p3 = intcodes[i+3]
-			}
 			if p1 < p2 {
-				intcodes[p3] = 1
+				intcodes[intcodes[i+3]] = 1
 			} else {
-				intcodes[p3] = 0
+				intcodes[intcodes[i+3]] = 0
 			}
 			i += 4
 		case 8: // equals
-			var p1, p2, p3 int
+			var p1, p2 int
 			if param1 == 0 {
 				p1 = intcodes[intcodes[i+1]]
 			} else {
@@ -179,15 +167,10 @@ func diagnosticProgram(intcodes []int, inputInstruction int) []int {
 			} else {
 				p2 = intcodes[i+2]
 			}
-			if param3 == 0 {
-				p3 = intcodes[intcodes[i+3]]
-			} else {
-				p3 = intcodes[i+3]
-			}
 			if p1 == p2 {
-				intcodes[p3] = 1
+				intcodes[intcodes[i+3]] = 1
 			} else {
-				intcodes[p3] = 0
+				intcodes[intcodes[i+3]] = 0
 			}
 			i += 4
 		case 99: // halt
